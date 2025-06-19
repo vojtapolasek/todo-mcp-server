@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "todo-mcp-server"
+version = "0.1.0"
+description = "MCP Server for Todo.txt management"
+authors = [{name = "Vojta"}]
+dependencies = [
+    "mcp>=1.0.0",
+    "python-dateutil>=2.8.0",
+]
+
+[project.scripts]
+todo-mcp-server = "src.server:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
