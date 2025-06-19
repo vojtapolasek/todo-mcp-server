@@ -19,20 +19,9 @@ def initialized_server(sample_todo_file):
 @pytest.mark.asyncio
 async def test_list_tools(initialized_server):
     """Test that all expected tools are listed"""
-    # Get the handler function directly
-    list_tools_handler = None
-    for handler in initialized_server._tool_handlers:
-        if hasattr(handler, '__name__') and 'list_tools' in str(handler):
-            list_tools_handler = handler
-            break
-    
-    # If we can't find handler directly, call the server's list_tools method
-    tools = []
-    for name, tool in initialized_server._tools.items():
-        tools.append(tool)
-    
-    # Alternative: test the handler function directly
+    # Call the handler function directly
     from src.server import handle_list_tools
+    
     tools = await handle_list_tools()
     
     tool_names = [tool.name for tool in tools]
@@ -47,6 +36,10 @@ async def test_list_tools(initialized_server):
     
     for expected in expected_tools:
         assert expected in tool_names
+    
+    # Verify we have the right number of tools
+    assert len(tools) == len(expected_tools)
+
 
 @pytest.mark.asyncio
 async def test_get_task_overview(initialized_server):
