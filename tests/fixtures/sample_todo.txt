@@ -1,7 +1,7 @@
+(C) backup laptop due:2024-12-20 t:2024-12-20 rec:+1w +maintenance
 (A) review quarterly reports due:2024-12-23 +work
 (B) update team documentation +work @offline
 call dentist about appointment +personal
-(C) backup laptop due:2024-12-20 t:2024-12-20 rec:+1w +maintenance
 plan vacation for next year +personal @low
 finish code review for PR #123 +development @waiting
 update project timeline +ssgrelease

@@ -3,21 +3,21 @@ MCP Server for Todo.txt management
 """
 import asyncio
 import json
+import sys
 from typing import Any, Sequence
-from mcp import ClientSession, StdioServerSession
-from mcp.server import Server
+from mcp.server.models import InitializationOptions
+from mcp.server import NotificationOptions, Server
 from mcp.types import (
     Resource,
     Tool,
     TextContent,
     ImageContent,
     EmbeddedResource,
-    LoggingLevel
+    LoggingLevel,
+    CallToolRequest,
+    ListToolsRequest
 )
 from .todo_manager import TodoManager
-
-# Server instance
-app = Server("todo-assistant")
 
 # Global todo manager - will be initialized with actual file path
 todo_manager: TodoManager = None
@@ -27,8 +27,11 @@ def init_todo_manager(todo_file_path: str):
     global todo_manager
     todo_manager = TodoManager(todo_file_path)
 
-@app.list_tools()
-async def list_tools() -> list[Tool]:
+# Create server instance
+server = Server("todo-assistant")
+
+@server.list_tools()
+async def handle_list_tools() -> list[Tool]:
     """List available tools"""
     return [
         Tool(
@@ -110,12 +113,15 @@ async def list_tools() -> list[Tool]:
         )
     ]
 
-@app.call_tool()
-async def call_tool(name: str, arguments: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
+@server.call_tool()
+async def handle_call_tool(name: str, arguments: dict | None) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
     """Handle tool calls"""
     
     if todo_manager is None:
         return [TextContent(type="text", text="Error: Todo manager not initialized")]
+    
+    if arguments is None:
+        arguments = {}
     
     try:
         if name == "get_task_overview":
@@ -140,4 +146,44 @@ async def call_tool(name: str, arguments: dict) -> Sequence[TextContent | ImageC
             return [TextContent(type="text", text=json.dumps(result, indent=2, ensure_ascii=False))]
         
         elif name == "show_inbox_tasks":
-            result = todo_manager.get_inbox_
+            result = todo_manager.get_inbox_tasks()
+            return [TextContent(type="text", text=json.dumps(result, indent=2, ensure_ascii=False))]
+        
+        elif name == "show_context_tasks":
+            context = arguments["context"]
+            result = todo_manager.get_tasks_by_context(context)
+            return [TextContent(type="text", text=json.dumps(result, indent=2, ensure_ascii=False))]
+        
+        else:
+            return [TextContent(type="text", text=f"Error: Unknown tool '{name}'")]
+    
+    except Exception as e:
+        return [TextContent(type="text", text=f"Error executing {name}: {str(e)}")]
+
+async def main():
+    """Main entry point"""
+    # Get todo file path from command line or use default
+    todo_file = sys.argv[1]
+    
+    # Initialize todo manager with file path
+    init_todo_manager(todo_file)
+    
+    # Run the server
+    from mcp.server.stdio import stdio_server
+    
+    async with stdio_server() as (read_stream, write_stream):
+        await server.run(
+            read_stream,
+            write_stream,
+            InitializationOptions(
+                server_name="todo-assistant",
+                server_version="0.1.0",
+                capabilities=server.get_capabilities(
+                    notification_options=NotificationOptions(),
+                    experimental_capabilities={},
+                ),
+            ),
+        )
+
+if __name__ == "__main__":
+    asyncio.run(main())
