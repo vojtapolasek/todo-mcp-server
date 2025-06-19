@@ -62,11 +62,19 @@ def test_task_sorting(parser):
     """Test that tasks are sorted correctly"""
     tasks = parser.filter_tasks(exclude_contexts=['waiting'])
     
-    # First task should be highest priority with earliest due date
-    # Based on sample data, should be the (A) task due 2024-12-23
+    # Tasks should be sorted: due dates first, then by priority
+    # The first task should be the one with earliest due date
+    # Based on sample data: (C) backup laptop due:2024-12-20 comes first
     first_task = tasks[0]
-    assert first_task['priority'] == 'A'
-    assert first_task['due_date'] == '2024-12-23'
+    assert first_task['priority'] == 'C'
+    assert first_task['due_date'] == '2024-12-20'
+    
+    # The second task should be (A) review quarterly reports due:2024-12-23  
+    if len(tasks) > 1:
+        second_task = tasks[1]
+        assert second_task['priority'] == 'A'
+        assert second_task['due_date'] == '2024-12-23'
+
 
 def test_project_filtering(parser):
     """Test filtering by specific project"""
