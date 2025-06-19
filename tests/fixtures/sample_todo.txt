@@ -1,0 +1,13 @@
+(A) review quarterly reports due:2024-12-23 +work
+(B) update team documentation +work @offline
+call dentist about appointment +personal
+(C) backup laptop due:2024-12-20 t:2024-12-20 rec:+1w +maintenance
+plan vacation for next year +personal @low
+finish code review for PR #123 +development @waiting
+update project timeline +ssgrelease
+(A) prepare for daily standup due:2024-12-24 +work
+x 2024-12-20 2024-12-19 completed example task
+research new tools +development @offline
+inbox item needs processing +in
+another inbox item +in
+fix bug in authentication system +development @offline
