@@ -3,7 +3,7 @@ High-level todo management with business logic
 """
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
-from .todo_parser import TodoParser
+from todo_parser import TodoParser
 
 class TodoManager:
     def __init__(self, todo_file: str):

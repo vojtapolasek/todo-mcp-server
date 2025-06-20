@@ -17,7 +17,7 @@ from mcp.types import (
     CallToolRequest,
     ListToolsRequest
 )
-from .todo_manager import TodoManager
+from todo_manager import TodoManager
 
 # Global todo manager - will be initialized with actual file path
 todo_manager: TodoManager = None
