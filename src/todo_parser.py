@@ -47,8 +47,8 @@ class TodoParser:
             if priority_match:
                 task['priority'] = priority_match.group(1)[1:-1]
         
-        # Extract projects (+project)
-        task['projects'] = re.findall(r'\+(\w+)', line)
+# Extract projects (+project) - exclude rec:+1d patterns
+task['projects'] = re.findall(r'(?<!:)\+(\w+)', line)
         
         # Extract contexts (@context)  
         task['contexts'] = re.findall(r'@(\w+)', line)
