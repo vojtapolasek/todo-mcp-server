@@ -4,7 +4,7 @@ Test MCP server functionality - corrected version
 import pytest
 import json
 from pathlib import Path
-from src.server import server, init_todo_manager
+from server import server, init_todo_manager
 
 @pytest.fixture
 def sample_todo_file():
@@ -20,7 +20,7 @@ def initialized_server(sample_todo_file):
 async def test_list_tools(initialized_server):
     """Test that all expected tools are listed"""
     # Call the handler function directly
-    from src.server import handle_list_tools
+    from server import handle_list_tools
     
     tools = await handle_list_tools()
     
@@ -45,7 +45,7 @@ async def test_list_tools(initialized_server):
 async def test_get_task_overview(initialized_server):
     """Test task overview tool"""
     # Import and call the handler directly
-    from src.server import handle_call_tool
+    from server import handle_call_tool
     
     result = await handle_call_tool("get_task_overview", {})
     
@@ -60,7 +60,7 @@ async def test_get_task_overview(initialized_server):
 @pytest.mark.asyncio
 async def test_suggest_next_task(initialized_server):
     """Test task suggestion"""
-    from src.server import handle_call_tool
+    from server import handle_call_tool
     
     result = await handle_call_tool("suggest_next_task", {})
     
@@ -74,7 +74,7 @@ async def test_suggest_next_task(initialized_server):
 @pytest.mark.asyncio  
 async def test_suggest_next_task_with_time(initialized_server):
     """Test task suggestion with time constraint"""
-    from src.server import handle_call_tool
+    from server import handle_call_tool
     
     result = await handle_call_tool("suggest_next_task", {
         "time_available_minutes": 30
@@ -88,7 +88,7 @@ async def test_suggest_next_task_with_time(initialized_server):
 @pytest.mark.asyncio
 async def test_show_project_tasks(initialized_server):
     """Test showing tasks for specific project"""
-    from src.server import handle_call_tool
+    from server import handle_call_tool
     
     result = await handle_call_tool("show_project_tasks", {
         "project_name": "work"
@@ -104,7 +104,7 @@ async def test_show_project_tasks(initialized_server):
 @pytest.mark.asyncio
 async def test_show_inbox_tasks(initialized_server):
     """Test showing inbox tasks"""
-    from src.server import handle_call_tool
+    from server import handle_call_tool
     
     result = await handle_call_tool("show_inbox_tasks", {})
     
@@ -118,7 +118,7 @@ async def test_show_inbox_tasks(initialized_server):
 @pytest.mark.asyncio
 async def test_show_waiting_tasks(initialized_server):
     """Test showing waiting tasks"""
-    from src.server import handle_call_tool
+    from server import handle_call_tool
     
     result = await handle_call_tool("show_waiting_tasks", {})
     
@@ -131,7 +131,7 @@ async def test_show_waiting_tasks(initialized_server):
 @pytest.mark.asyncio
 async def test_show_context_tasks(initialized_server):
     """Test showing tasks by context"""
-    from src.server import handle_call_tool
+    from server import handle_call_tool
     
     result = await handle_call_tool("show_context_tasks", {
         "context": "offline"
@@ -147,7 +147,7 @@ async def test_show_context_tasks(initialized_server):
 @pytest.mark.asyncio
 async def test_invalid_tool_name(initialized_server):
     """Test calling non-existent tool"""
-    from src.server import handle_call_tool
+    from server import handle_call_tool
     
     result = await handle_call_tool("invalid_tool", {})
     
@@ -157,7 +157,7 @@ async def test_invalid_tool_name(initialized_server):
 @pytest.mark.asyncio  
 async def test_missing_required_argument(initialized_server):
     """Test calling tool without required argument"""
-    from src.server import handle_call_tool
+    from server import handle_call_tool
     
     result = await handle_call_tool("show_project_tasks", {})
     

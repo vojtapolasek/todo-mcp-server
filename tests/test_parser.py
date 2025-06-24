@@ -3,7 +3,7 @@ Test todo parser functionality
 """
 import pytest
 from pathlib import Path
-from src.todo_parser import TodoParser
+from todo_parser import TodoParser
 
 @pytest.fixture
 def sample_todo_file():
