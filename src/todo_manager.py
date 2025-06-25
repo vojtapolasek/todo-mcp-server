@@ -45,12 +45,25 @@ class TodoManager:
             'due_today': due_today,
             'overdue': overdue
         }
-    
-    def suggest_next_task(self, 
-                         time_available_minutes: Optional[int] = None,
-                         context_filter: Optional[str] = None,
-                         energy_level: Optional[str] = None) -> Dict[str, Any]:
+
+    def suggest_next_task(self,
+                        time_available_minutes: Optional[int] = None,
+                        context_filter: Optional[str] = None,
+                        energy_level: Optional[str] = None) -> Dict[str, Any]:
         """Suggest next task with reasoning"""
+        
+        # Define energy and time context mappings
+        ENERGY_CONTEXTS = {
+            'high': ['focus', 'creative', 'complex', 'brainstorm', 'learn'],
+            'medium': ['medium'],  # Neutral tasks
+            'low': ['routine', 'admin', 'communicate', 'organize', 'review']
+        }
+        
+        TIME_CONTEXTS = {
+            'quick': ['quick', 'call', 'email'],        # ≤15 min
+            'medium': ['medium', 'meeting'],             # 15-60 min  
+            'long': ['deep', 'project']                  # >60 min
+        }
         
         filters = {'exclude_contexts': ['waiting']}
         if context_filter:
@@ -61,9 +74,43 @@ class TodoManager:
         if not tasks:
             return {'error': 'No available tasks found'}
         
-        # Simple suggestion logic - take the first (highest priority due date)
-        suggested = tasks[0]
-        alternatives = tasks[1:4] if len(tasks) > 1 else []
+        candidate_tasks = tasks
+        filtering_reasons = []
+        
+        # Filter by energy level
+        if energy_level and energy_level in ENERGY_CONTEXTS:
+            energy_tasks = [task for task in candidate_tasks 
+                        if any(ctx in ENERGY_CONTEXTS[energy_level] 
+                                for ctx in task['contexts'])]
+            if energy_tasks:
+                candidate_tasks = energy_tasks
+                filtering_reasons.append(f"filtered for {energy_level} energy tasks")
+        
+        # Filter by time available
+        if time_available_minutes:
+            target_time_category = None
+            if time_available_minutes <= 15:
+                target_time_category = 'quick'
+            elif time_available_minutes <= 60:
+                target_time_category = 'medium'
+            else:
+                target_time_category = 'long'
+            
+            time_tasks = [task for task in candidate_tasks 
+                        if any(ctx in TIME_CONTEXTS[target_time_category] 
+                            for ctx in task['contexts'])]
+            if time_tasks:
+                candidate_tasks = time_tasks
+                filtering_reasons.append(f"filtered for {target_time_category} duration tasks")
+        
+        # Fallback: if no tasks match energy/time filters, use original list
+        if not candidate_tasks:
+            candidate_tasks = tasks
+            filtering_reasons.append("no tasks matched filters, showing all available")
+        
+        # Select the best candidate
+        suggested = candidate_tasks[0]
+        alternatives = candidate_tasks[1:4] if len(candidate_tasks) > 1 else []
         
         # Build reasoning
         reasons = []
@@ -75,13 +122,18 @@ class TodoManager:
                 reasons.append(f"Due {suggested['due_date']}")
         
         if suggested['priority']:
-            reasons.append(f"High priority ({suggested['priority']})")
+            reasons.append(f"Priority {suggested['priority']}")
         
         if context_filter:
-            reasons.append(f"Matches context: {context_filter}")
+            reasons.append(f"Matches context {context_filter}")
         
+        # Add time available to reasoning
         if time_available_minutes:
             reasons.append(f"You have {time_available_minutes} minutes available")
+        
+        # Add filtering reasons
+        if filtering_reasons:
+            reasons.extend(filtering_reasons)
         
         if not reasons:
             reasons.append("Next in priority order")
@@ -90,9 +142,10 @@ class TodoManager:
             'suggested_task': suggested,
             'reasoning': '; '.join(reasons),
             'alternatives': alternatives,
-            'total_available': len(tasks)
+            'total_available': len(tasks),
+            'filtered_candidates': len(candidate_tasks)
         }
-    
+
     def get_project_tasks(self, project_name: str) -> Dict[str, Any]:
         """Get all tasks for a specific project"""
         active_tasks = self.parser.filter_tasks(include_projects=[project_name])

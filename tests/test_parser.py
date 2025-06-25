@@ -91,3 +91,53 @@ def test_offline_context_filtering(parser):
     
     for task in offline_tasks:
         assert 'offline' in task['contexts']
+
+def test_parse_energy_contexts(parser):
+    """Test parsing tasks with energy level contexts"""
+    task = parser.parse_line("(A) complex analysis +work @focus @deep")
+    
+    assert 'focus' in task['contexts']
+    assert 'deep' in task['contexts']
+    assert task['priority'] == 'A'
+    assert 'work' in task['projects']
+
+def test_parse_time_contexts(parser):
+    """Test parsing tasks with time duration contexts"""
+    task = parser.parse_line("quick email to client @call @quick +work")
+    
+    assert 'call' in task['contexts']
+    assert 'quick' in task['contexts']
+    assert 'work' in task['projects']
+
+def test_parse_multiple_context_types(parser):
+    """Test parsing tasks with both energy and time contexts"""
+    task = parser.parse_line("organize project files @organize @routine @medium +project")
+    
+    assert 'organize' in task['contexts']
+    assert 'routine' in task['contexts']
+    assert 'medium' in task['contexts']
+    assert 'project' in task['projects']
+
+def test_filter_by_energy_contexts(parser):
+    """Test filtering tasks by energy-related contexts"""
+    # Test high energy contexts
+    focus_tasks = parser.filter_tasks(include_contexts=['focus'])
+    for task in focus_tasks:
+        assert 'focus' in task['contexts']
+    
+    # Test low energy contexts  
+    routine_tasks = parser.filter_tasks(include_contexts=['routine'])
+    for task in routine_tasks:
+        assert 'routine' in task['contexts']
+
+def test_filter_by_time_contexts(parser):
+    """Test filtering tasks by time-related contexts"""
+    # Test quick tasks
+    quick_tasks = parser.filter_tasks(include_contexts=['quick'])
+    for task in quick_tasks:
+        assert 'quick' in task['contexts']
+    
+    # Test deep work tasks
+    deep_tasks = parser.filter_tasks(include_contexts=['deep'])
+    for task in deep_tasks:
+        assert 'deep' in task['contexts']

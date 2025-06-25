@@ -1,13 +1,17 @@
-(C) backup laptop due:2024-12-20 t:2024-12-20 rec:+1w +maintenance
-(A) review quarterly reports due:2024-12-23 +work
-(B) update team documentation +work @offline
-call dentist about appointment +personal
-plan vacation for next year +personal @low
-finish code review for PR #123 +development @waiting
-update project timeline +ssgrelease
-(A) prepare for daily standup due:2024-12-24 +work
+(C) backup laptop due:2024-12-20 t:2024-12-20 rec:+1w +maintenance @routine @quick
+(A) review quarterly reports due:2024-12-23 +work @focus @deep
+(B) update team documentation +work @offline @routine @medium
+call dentist about appointment +personal @call @quick
+plan vacation for next year +personal @low @brainstorm @medium
+finish code review for PR #123 +development @waiting @focus @medium
+update project timeline +ssgrelease @admin @medium
+(A) prepare for daily standup due:2024-12-24 +work @organize @quick
 x 2024-12-20 2024-12-19 completed example task
-research new tools +development @offline
-inbox item needs processing +in
-another inbox item +in
-fix bug in authentication system +development @offline
+research new tools +development @offline @learn @deep
+inbox item needs processing +in @routine @quick
+another inbox item +in @admin @quick
+fix bug in authentication system +development @offline @focus @deep
+organize email inbox @organize @routine @medium +admin
+brainstorm marketing strategy @creative @brainstorm @deep +marketing
+quick team check-in @call @quick +work
+write blog post draft @creative @deep +content
