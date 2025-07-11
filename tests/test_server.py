@@ -31,7 +31,8 @@ async def test_list_tools(initialized_server):
         "show_project_tasks",
         "show_waiting_tasks",
         "show_inbox_tasks",
-        "show_context_tasks"
+        "show_context_tasks",
+        "query_tasks"
     ]
     
     for expected in expected_tools:
@@ -161,4 +162,24 @@ async def test_missing_required_argument(initialized_server):
     
     result = await handle_call_tool("show_project_tasks", {})
     
-  
+
+@pytest.mark.asyncio
+async def test_query_tasks(initialized_server):
+    """Test generic query tasks tool"""
+    from server import handle_call_tool
+    
+    result = await handle_call_tool("query_tasks", {
+        "query_text": "review",
+        "projects": ["work"],
+        "max_results": 10
+    })
+    
+    assert len(result) == 1
+    data = json.loads(result[0].text)
+    
+    assert 'tasks' in data
+    assert 'query_info' in data
+    assert 'results_info' in data
+    assert data['query_info']['query_text'] == "review"
+    assert data['query_info']['projects_filter'] == ["work"]
+    assert data['results_info']['total_returned'] <= 10

@@ -8,7 +8,7 @@ from todo_parser import TodoParser
 class TodoManager:
     def __init__(self, todo_file: str):
         self.parser = TodoParser(todo_file)
-    
+
     def get_overview(self) -> Dict[str, Any]:
         """Get comprehensive task overview"""
         all_tasks = self.parser.load_all_tasks()
@@ -198,4 +198,78 @@ class TodoManager:
             'context': context,
             'tasks': tasks,
             'count': len(tasks)
+        }
+
+    def query_tasks(self, 
+                   query_text: str = "",
+                   projects: List[str] = None,
+                   contexts: List[str] = None,
+                   exclude_completed: bool = True,
+                   max_results: int = 20) -> Dict[str, Any]:
+        """Generic query interface for searching tasks"""
+        
+        # Start with base filtering
+        filters = {
+            'only_active': exclude_completed
+        }
+        
+        # Apply project and context filters if provided
+        if projects:
+            filters['include_projects'] = projects
+        if contexts:
+            filters['include_contexts'] = contexts
+            
+        # Get filtered tasks
+        tasks = self.parser.filter_tasks(**filters)
+        
+        # Apply text search if query_text is provided
+        if query_text:
+            query_lower = query_text.lower()
+            matching_tasks = []
+            
+            for task in tasks:
+                # Search in description (cleaned task text)
+                if query_lower in task['description'].lower():
+                    matching_tasks.append(task)
+                    continue
+                
+                # Search in raw task text
+                if query_lower in task['raw'].lower():
+                    matching_tasks.append(task)
+                    continue
+                    
+                # Search in projects
+                if any(query_lower in proj.lower() for proj in task['projects']):
+                    matching_tasks.append(task)
+                    continue
+                    
+                # Search in contexts
+                if any(query_lower in ctx.lower() for ctx in task['contexts']):
+                    matching_tasks.append(task)
+                    continue
+                    
+            tasks = matching_tasks
+        
+        # Limit results
+        if max_results and len(tasks) > max_results:
+            tasks = tasks[:max_results]
+            truncated = True
+        else:
+            truncated = False
+        
+        # Build response with metadata
+        return {
+            'tasks': tasks,
+            'query_info': {
+                'query_text': query_text,
+                'projects_filter': projects or [],
+                'contexts_filter': contexts or [],
+                'exclude_completed': exclude_completed,
+                'max_results': max_results
+            },
+            'results_info': {
+                'total_returned': len(tasks),
+                'truncated': truncated,
+                'search_applied': bool(query_text)
+            }
         }

@@ -110,6 +110,40 @@ async def handle_list_tools() -> list[Tool]:
                 },
                 "required": ["context"]
             }
+        ),
+        Tool(
+            name="query_tasks",
+            description="Generic query interface for searching tasks by project, context, or task name with flexible filtering",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query_text": {
+                        "type": "string",
+                        "description": "Search text to find in task descriptions (partial match, case-insensitive)"
+                    },
+                    "projects": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Filter by specific projects (e.g., ['work', 'personal']). If empty, include all projects."
+                    },
+                    "contexts": {
+                        "type": "array", 
+                        "items": {"type": "string"},
+                        "description": "Filter by specific contexts (e.g., ['focus', 'offline']). If empty, include all contexts."
+                    },
+                    "exclude_completed": {
+                        "type": "boolean",
+                        "description": "Whether to exclude completed tasks (default: true)",
+                        "default": True
+                    },
+                    "max_results": {
+                        "type": "integer",
+                        "description": "Maximum number of results to return (default: 1000)",
+                        "default": 1000
+                    }
+                },
+                "required": []
+            }
         )
     ]
 
@@ -153,7 +187,20 @@ async def handle_call_tool(name: str, arguments: dict | None) -> Sequence[TextCo
             context = arguments["context"]
             result = todo_manager.get_tasks_by_context(context)
             return [TextContent(type="text", text=json.dumps(result, indent=2, ensure_ascii=False))]
-        
+        elif name == "query_tasks":
+            query_text = arguments.get("query_text", "")
+            projects = arguments.get("projects", [])
+            contexts = arguments.get("contexts", [])
+            exclude_completed = arguments.get("exclude_completed", True)
+            max_results = arguments.get("max_results", 1000)
+            result = todo_manager.query_tasks(
+                query_text=query_text,
+                projects=projects,
+                contexts=contexts,
+                exclude_completed=exclude_completed,
+                max_results=max_results
+            )
+            return [TextContent(type="text", text=json.dumps(result, indent=2, ensure_ascii=False))]
         else:
             return [TextContent(type="text", text=f"Error: Unknown tool '{name}'")]
     
